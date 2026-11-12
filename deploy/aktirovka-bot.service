@@ -1,0 +1,16 @@
+[Unit]
+Description=Norilsk aktirovka Telegram bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=bot
+WorkingDirectory=/opt/aktirovka-bot
+ExecStart=/opt/aktirovka-bot/.venv/bin/python -m bot
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
