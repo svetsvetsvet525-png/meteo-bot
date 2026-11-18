@@ -14,7 +14,12 @@ VPS="${1:-}"
 
 echo "== 1/5 Пакеты =="
 pkg update -y
-pkg install -y python python-pip git openssh build-essential binutils
+# rust нужен для сборки pydantic-core (зависимость aiogram 3.x): под Android
+# готового wheel нет, а rustup не знает таргет aarch64-linux-android —
+# поэтому берём нативный rust из репозитория Termux.
+pkg install -y python python-pip git openssh build-essential binutils rust libc++
+# maturin (сборщик pydantic-core) на Android хочет знать API level
+export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk 2>/dev/null || echo 30)"
 
 echo "== 2/5 Код из GitHub =="
 if [ -d "$HOME/meteo-bot/.git" ]; then
@@ -23,8 +28,8 @@ else
     git clone "$REPO" "$HOME/meteo-bot"
 fi
 
-echo "== 3/5 Зависимости (несколько минут) =="
-pip install -r "$HOME/meteo-bot/requirements.txt"
+echo "== 3/5 Зависимости (несколько минут; pydantic-core собирается из Rust) =="
+python -m pip install -r "$HOME/meteo-bot/requirements.txt"
 
 echo "== 4/5 Файл .env с токеном =="
 if [ ! -f "$HOME/meteo-bot/.env" ]; then

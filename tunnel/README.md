@@ -64,6 +64,16 @@ Onion/Tor в РФ сам заблокирован. Если в будущем Te
 
 Лог: `tail -f ~/bot.log`. Обновление кода: `cd ~/meteo-bot && git pull` + шаг 4.
 
+> Если `pip` падает на `pydantic-core` / `maturin` («Target triple not supported
+> by rustup»): это нормально для Termux — готового wheel под Android нет.
+> Лечится нативным Rust из репозитория Termux (уже прописан в установщике):
+> ```
+> pkg install -y rust binutils libc++
+> export ANDROID_API_LEVEL="$(getprop ro.build.version.sdk)"
+> python -m pip install -r ~/meteo-bot/requirements.txt
+> ```
+> Сборка Rust-зависимости на старом телефоне идёт 10–20 минут — это ожидаемо.
+
 ### Необязательная SOCKS-страховка для Telegram через VPS
 
 Если Telegram с телефона работает хорошо — ничего этого не нужно. Если нет:
