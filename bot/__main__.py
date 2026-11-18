@@ -8,11 +8,27 @@ import time
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.exceptions import TelegramNetworkError
 
 from bot import config, handlers, watch
 from bot.db import Database
+
+
+def _make_bot() -> Bot:
+    """Создаёт бота; при заданном TELEGRAM_PROXY — через SOCKS/HTTP-прокси.
+
+    Обычно не нужно (Telegram в России работает напрямую), но годится
+    как страховка: socks5-релей поднимается на своём VPS командой
+    `ssh -N -D 1080 root@vps` (см. tunnel/run_bot_termux.sh).
+    """
+    kwargs: dict = {
+        "default": DefaultBotProperties(parse_mode=ParseMode.HTML),
+    }
+    if config.TELEGRAM_PROXY:
+        kwargs["session"] = AiohttpSession(proxy=config.TELEGRAM_PROXY)
+    return Bot(token=config.BOT_TOKEN, **kwargs)
 
 
 async def main() -> None:
@@ -27,10 +43,7 @@ async def main() -> None:
     db = Database(config.DB_PATH)
     await db.init()
 
-    bot = Bot(
-        token=config.BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML),
-    )
+    bot = _make_bot()
     dp = Dispatcher()
     dp.include_router(handlers.router)
     dp["db"] = db

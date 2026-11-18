@@ -50,3 +50,9 @@ SITE_VERIFY_SSL: bool = os.getenv("SITE_VERIFY_SSL", "1") == "1"
 # Часовой пояс города (для определения «сегодня»)
 TZ_NAME: str = os.getenv("TZ_NAME", "Asia/Krasnoyarsk")
 TZ: ZoneInfo = ZoneInfo(TZ_NAME)
+
+# Прокси для Telegram API. Обычно не нужен: Telegram в России работает напрямую.
+# Страховка от редких замедлений — SOCKS через свой VPS (см. tunnel/README.md):
+#   на телефоне:  ssh -N -D 1080 root@vps   (делает скрипт run_bot_termux.sh)
+#   в .env:       TELEGRAM_PROXY=socks5://127.0.0.1:1080
+TELEGRAM_PROXY: str = os.getenv("TELEGRAM_PROXY", "").strip()
